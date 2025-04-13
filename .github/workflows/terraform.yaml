@@ -96,9 +96,6 @@ jobs:
         run: exit 1
 
       # Apply or Destroy runs ONLY when manually triggered via workflow_dispatch
-      - name: Terraform Apply
-        if: github.event_name == 'workflow_dispatch' && github.event.inputs.action == 'apply'
-        run: terraform apply -auto-approve -input=false
 
       - name: Terraform Destroy
         if: github.event_name == 'workflow_dispatch' && github.event.inputs.action == 'destroy'
