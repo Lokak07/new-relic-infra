@@ -34,14 +34,12 @@ jobs:
       - name: Checkout the repository to the runner
         uses: actions/checkout@v2
 
-        
-
       - name: Setup Terraform with specified version on the runner
         uses: hashicorp/setup-terraform@v2
         with:
           terraform_version: 1.5.0  # match your .tf file version
 
-      - name: download terraform.tfvars from s3
+      - name: Download terraform.tfvars from s3
         run: |
           aws s3 cp s3://my-secure-terraform-state-shakthi/terraform.tfvars terraform.tfvars
 
@@ -96,5 +94,5 @@ jobs:
         run: exit 1
 
       - name: Terraform Apply
-        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-        run: terraform apply -auto-approve -input=false
+        if: github.event_name == 'workflow_dispatch'  # This is to ensure manual trigger
+        run: terraform apply -input=false
