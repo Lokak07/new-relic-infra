@@ -37,6 +37,7 @@ module "ec2_instance" {
   instance_type = var.instance_type
   key_name      = var.key_name
   monitoring    = var.monitoring
+  associate_public_ip_address = true
   vpc_security_group_ids = length(var.security_group) > 0 ? var.security_group : [
     module.security-group_https-443.security_group_id,
     module.http_80_security_group.security_group_id,
