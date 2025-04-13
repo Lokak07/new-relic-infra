@@ -34,14 +34,16 @@ jobs:
       - name: Checkout the repository to the runner
         uses: actions/checkout@v2
 
+        
+
       - name: Setup Terraform with specified version on the runner
         uses: hashicorp/setup-terraform@v2
         with:
           terraform_version: 1.5.0  # match your .tf file version
 
-      - name: Create terraform.tfvars from GitHub Secret
+      - name: download terraform.tfvars from s3
         run: |
-          echo "${{ secrets.TERRAFORM_TFVARS_CONTENT }}" > terraform.tfvars    
+          aws s3 cp s3://my-secure-terraform-state-shakthi/terraform.tfvars terraform.tfvars
 
       - name: Terraform init
         id: init
