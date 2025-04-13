@@ -6,12 +6,15 @@ on:
       - main
     paths:
       - new-relic/**
+      - .github/workflows/**         # trigger when workflow files are updated too
+
   pull_request:
     branches:
       - main
     paths:
       - new-relic/**
-      - .github/workflows/**
+
+  workflow_dispatch:                # allows manual trigger from GitHub UI
 
 env: 
   TF_LOG: INFO
@@ -34,7 +37,7 @@ jobs:
       - name: Setup Terraform with specified version on the runner
         uses: hashicorp/setup-terraform@v2
         with:
-          terraform_version: 1.5.0  # match your .tf file, change from 1.3.0
+          terraform_version: 1.5.0  # match your .tf file version
 
       - name: Terraform init
         id: init
