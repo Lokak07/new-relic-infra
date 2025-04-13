@@ -11,6 +11,7 @@ on:
       - main
     paths:
       - new-relic/**
+      - .github/workflows/**
 
 env: 
   TF_LOG: INFO
