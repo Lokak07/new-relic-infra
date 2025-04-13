@@ -23,7 +23,6 @@ on:
         type: choice
         options:
           - apply
-          - destroy
 
 env: 
   TF_LOG: INFO
@@ -95,8 +94,7 @@ jobs:
         if: github.event_name == 'pull_request' && steps.plan.outcome == 'failure'
         run: exit 1
 
-      # Apply or Destroy runs ONLY when manually triggered via workflow_dispatch
-
-      - name: Terraform Destroy
-        if: github.event_name == 'workflow_dispatch' && github.event.inputs.action == 'destroy'
-        run: terraform destroy -auto-approve -input=false
+      # Apply runs ONLY for push and pull requests, or manually triggered apply
+      - name: Terraform Apply
+        if: github.event_name == 'push' || github.event_name == 'pull_request' || (github.event_name == 'workflow_dispatch' && github.event.inputs.action == 'apply')
+        run: terraform apply -auto-approve -input=false
