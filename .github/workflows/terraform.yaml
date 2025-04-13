@@ -39,6 +39,10 @@ jobs:
         with:
           terraform_version: 1.5.0  # match your .tf file version
 
+      - name: Create terraform.tfvars from GitHub Secret
+        run: |
+          echo "${{ secrets.TERRAFORM_TFVARS_CONTENT }}" > terraform.tfvars    
+
       - name: Terraform init
         id: init
         run: terraform init
