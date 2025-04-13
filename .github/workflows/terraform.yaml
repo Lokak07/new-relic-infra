@@ -6,7 +6,7 @@ on:
       - main
     paths:
       - new-relic/**
-      - .github/workflows/**         # trigger when workflow files are updated too
+      - .github/workflows/**
 
   pull_request:
     branches:
@@ -14,7 +14,16 @@ on:
     paths:
       - new-relic/**
 
-  workflow_dispatch:                # allows manual trigger from GitHub UI
+  workflow_dispatch:
+    inputs:
+      action:
+        description: 'Terraform action to perform'
+        required: true
+        default: 'apply'
+        type: choice
+        options:
+          - apply
+          - destroy
 
 env: 
   TF_LOG: INFO
@@ -31,15 +40,15 @@ jobs:
         working-directory: ./new-relic
 
     steps:
-      - name: Checkout the repository to the runner
+      - name: Checkout the repository
         uses: actions/checkout@v2
 
-      - name: Setup Terraform with specified version on the runner
+      - name: Setup Terraform
         uses: hashicorp/setup-terraform@v2
         with:
-          terraform_version: 1.5.0  # match your .tf file version
+          terraform_version: 1.5.0
 
-      - name: Download terraform.tfvars from s3
+      - name: Download terraform.tfvars from S3
         run: |
           aws s3 cp s3://my-secure-terraform-state-shakthi/terraform.tfvars terraform.tfvars
 
@@ -57,7 +66,7 @@ jobs:
 
       - name: Terraform plan
         id: plan
-        if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+        if: github.event_name == 'pull_request'
         run: terraform plan -no-color -input=false
         continue-on-error: true
 
@@ -72,16 +81,8 @@ jobs:
             #### Terraform Initialization ⚙️\`${{ steps.init.outcome }}\`
             #### Terraform Validation 🤖\`${{ steps.validate.outcome }}\`
             #### Terraform Plan 📖\`${{ steps.plan.outcome }}\`
-
-            <details><summary>Show Plan</summary>
-
-            \`\`\`\n
-            ${process.env.PLAN}
-            \`\`\`
-
-            </details>
+            <details><summary>Show Plan</summary>\`\`\`\n${process.env.PLAN}\`\`\`\n</details>
             *Pushed by: @${{ github.actor }}, Action: \`${{ github.event_name }}\`*`;
-
             github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
@@ -93,12 +94,10 @@ jobs:
         if: steps.plan.outcome == 'failure'
         run: exit 1
 
-      # Terraform Apply - will run automatically on push to main or manually via workflow_dispatch
       - name: Terraform Apply
-        if: github.event_name == 'workflow_dispatch' || (github.ref == 'refs/heads/main' && github.event_name == 'push')
+        if: github.event_name == 'workflow_dispatch' && github.event.inputs.action == 'apply'
         run: terraform apply -auto-approve -input=false
 
-      # Terraform Destroy - will only run manually through workflow_dispatch
       - name: Terraform Destroy
-        if: github.event_name == 'workflow_dispatch' && github.event.inputs.destroy == 'true'  # Manually triggered only
+        if: github.event_name == 'workflow_dispatch' && github.event.inputs.action == 'destroy'
         run: terraform destroy -auto-approve -input=false
