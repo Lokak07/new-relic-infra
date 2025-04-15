@@ -54,7 +54,11 @@ module "ec2_instance" {
   ami       = var.ami_id
   subnet_id = var.subnet_id != "" ? var.subnet_id : module.vpc.public_subnets[0]
   tags      = var.tags
+
+  user_data = file("${path.module}/scripts/boot_init.sh")
 }
+
+
 
 # security group modules
 
