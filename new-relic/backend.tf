@@ -1,6 +1,5 @@
 # enabled versioning and state locking on s3
 
-
 terraform {
   required_version = ">= 1.5.0"
   backend "s3" {
@@ -8,6 +7,7 @@ terraform {
     key     = "vpc/terraform.tfstate"
     region  = "us-east-1"
     encrypt = true
+    use_lockfile = true
     # No dynamodb table — trying to use native locking.
   }
 }
